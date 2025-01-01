@@ -1,4 +1,4 @@
-# 2025 Geri Sayım Web Sitesi
+# 2026 Geri Sayım Web Sitesi
 
 Modern ve minimalist tasarıma sahip, kişiselleştirilebilir bir geri sayım web uygulaması. Resmi tatilleri takip edin, özel günlerinizi ekleyin ve notlarınızı kaydedin.
 
