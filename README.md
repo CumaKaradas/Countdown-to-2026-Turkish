@@ -82,13 +82,13 @@ Uygulama aşağıdaki verileri tarayıcınızın yerel deposunda saklar:
 - Ramazan Bayramı: 24-26 Nisan 2025, Perşembe-Cumartesi
 - Kurban Bayramı: 26-29 Haziran 2025, Perşembe-Pazar
 
-## 🎯 Gelecek Güncellemeler
+## 🎯 Son Yapılan Güncellemeler
 
-- [ +] Takvim görünümü
-- [ +] Haftalık görünüm
-- [ +] Tatil hatırlatıcıları
-- [ +] Kategori bazlı özel gün ekleme
-- [ +] Dışa/İçe aktarma özelliği
+- [ ] Takvim görünümü
+- [ ] Haftalık görünüm
+- [ ] Tatil hatırlatıcıları
+- [ ] Kategori bazlı özel gün ekleme
+- [ ] Dışa/İçe aktarma özelliği
 
 ## ⚠️ Not
 
