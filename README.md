@@ -84,11 +84,11 @@ Uygulama aşağıdaki verileri tarayıcınızın yerel deposunda saklar:
 
 ## 🎯 Gelecek Güncellemeler
 
-- [ ] Takvim görünümü
-- [ ] Haftalık görünüm
-- [ ] Tatil hatırlatıcıları
-- [ ] Kategori bazlı özel gün ekleme
-- [ ] Dışa/İçe aktarma özelliği
+- [ +] Takvim görünümü
+- [ +] Haftalık görünüm
+- [ +] Tatil hatırlatıcıları
+- [ +] Kategori bazlı özel gün ekleme
+- [ +] Dışa/İçe aktarma özelliği
 
 ## ⚠️ Not
 
