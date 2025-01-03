@@ -13,6 +13,7 @@
             --input-border: #ddd;
             --input-bg: #fff;
             --hover-color: #f5f5f5;
+            --category-colors: #ff9999, #99ff99, #9999ff, #ffff99, #ff99ff;
         }
 
         :root[data-theme="dark"] {
@@ -23,6 +24,7 @@
             --input-border: #404040;
             --input-bg: #2a2a2a;
             --hover-color: #252525;
+            --category-colors: #993333, #339933, #333399, #999933, #993399;
         }
 
         * {
@@ -193,9 +195,37 @@
 
         .custom-input {
             display: grid;
-            grid-template-columns: 1fr auto auto;
+            grid-template-columns: 1fr 1fr auto auto;
             gap: 1rem;
             margin-top: 1rem;
+        }
+
+        .category-filter {
+            margin: 1rem 0;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .category-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .category-badge.active {
+            opacity: 1;
+        }
+
+        .category-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
         }
 
         .date-input {
@@ -303,6 +333,125 @@
                 grid-template-columns: 1fr;
             }
         }
+        .calendar-section {
+    padding: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem 0;
+}
+
+.calendar-view {
+    margin-top: 1rem;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background-color: var(--border-color);
+}
+
+.calendar-day {
+    background-color: var(--bg-color);
+    padding: 0.5rem;
+    min-height: 80px;
+    position: relative;
+}
+
+.calendar-day.other-month {
+    opacity: 0.5;
+}
+
+.calendar-day.today {
+    background-color: var(--hover-color);
+}
+
+.calendar-day .date {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 0.9rem;
+}
+
+.calendar-day .events {
+    margin-top: 25px;
+    font-size: 0.8rem;
+}
+
+.calendar-day .event {
+    margin: 2px 0;
+    padding: 2px 4px;
+    border-radius: 2px;
+    background-color: var(--hover-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Haftalık görünüm stilleri */
+.week-header {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    text-align: center;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.week-body {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    gap: 1px;
+    background-color: var(--border-color);
+}
+
+.time-slot {
+    background-color: var(--bg-color);
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    height: 60px;
+}
+
+.time-label {
+    font-size: 0.8rem;
+    color: var(--secondary-text);
+}
+
+.week-event {
+    background-color: var(--hover-color);
+    margin: 1px;
+    padding: 2px;
+    font-size: 0.8rem;
+    border-radius: 2px;
+}
+
+.reminder-section, .import-export-section {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .reminder-settings {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .reminder-checkbox {
+            margin-right: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -348,16 +497,82 @@
             <div class="holiday-list" id="holidayList"></div>
         </section>
 
+        <section class="reminder-section">
+            <h2>Tatil Hatırlatıcıları</h2>
+            <div class="reminder-settings">
+                <label>
+                    <input type="checkbox" id="enableReminders" class="reminder-checkbox">
+                    Tatil hatırlatıcılarını etkinleştir
+                </label>
+                <select id="reminderDays" class="date-input">
+                    <option value="1">1 gün önce</option>
+                    <option value="3">3 gün önce</option>
+                    <option value="7">1 hafta önce</option>
+                    <option value="14">2 hafta önce</option>
+                    <option value="30">1 ay önce</option>
+                </select>
+            </div>
+        </section>
+    
+        <section class="import-export-section">
+            <h2>Veri Yedekleme</h2>
+            <div class="button-group">
+                <button class="save-btn" onclick="exportData()">Verileri Dışa Aktar</button>
+                <input type="file" id="importFile" accept=".json" style="display: none">
+                <button class="save-btn" onclick="document.getElementById('importFile').click()">Verileri İçe Aktar</button>
+            </div>
+        </section>
+
         <section class="custom-countdown-section">
             <h2>Özel Günler</h2>
             <div class="custom-input">
                 <input type="text" id="eventName" class="date-input" placeholder="Etkinlik Adı">
+                <select id="eventCategory" class="date-input">
+                    <option value="dogumGunu">Doğum Günü</option>
+                    <option value="yildonumu">Yıldönümü</option>
+                    <option value="toplanti">Toplantı</option>
+                    <option value="deadline">Son Tarih</option>
+                    <option value="diger">Diğer</option>
+                </select>
                 <input type="date" id="eventDate" class="date-input">
                 <button class="save-btn" onclick="addCustomEvent()">Ekle</button>
             </div>
+            <div class="category-filter" id="categoryFilter"></div>
             <div class="custom-list" id="customList"></div>
         </section>
-
+   <section class="calendar-section">
+        <div class="section-header">
+            <h2>Takvim</h2>
+            <select id="calendarViewSwitch" class="holiday-type-switch">
+                <option value="month">Aylık Görünüm</option>
+                <option value="week">Haftalık Görünüm</option>
+            </select>
+        </div>
+        <div class="calendar-controls">
+            <button class="save-btn" id="prevBtn">&lt;</button>
+            <h3 id="currentDate">Ocak 2024</h3>
+            <button class="save-btn" id="nextBtn">&gt;</button>
+        </div>
+        <div id="monthView" class="calendar-view">
+            <div class="calendar-header">
+                <span>Pzt</span>
+                <span>Sal</span>
+                <span>Çar</span>
+                <span>Per</span>
+                <span>Cum</span>
+                <span>Cmt</span>
+                <span>Paz</span>
+            </div>
+            <div id="calendarDays" class="calendar-days"></div>
+        </div>
+        <div id="weekView" class="calendar-view" style="display: none">
+            <div class="week-header">
+                <div class="time-column">Saat</div>
+                <div class="week-days" id="weekDays"></div>
+            </div>
+            <div class="week-body" id="weekBody"></div>
+        </div>
+    </section>
         <section class="notes-section">
             <h2>Notlarım</h2>
             <textarea class="notes-input" id="notesInput" placeholder="Notlarınızı buraya yazın..."></textarea>
@@ -367,6 +582,7 @@
             </div>
         </section>
     </div>
+
     <script>
         // Tema değiştirici
         const themeToggle = document.getElementById('themeToggle');
@@ -408,8 +624,8 @@
             document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
         }
         
-        // 2025 Resmi tatiller
-        const holidays = [
+         // 2025 Resmi tatiller
+         const holidays = [
             { name: "Yılbaşı", date: "2025-01-01", type: "resmi" },
             { name: "Ulusal Egemenlik ve Çocuk Bayramı", date: "2025-04-23", type: "resmi" },
             { name: "Ramazan Bayramı (1. Gün)", date: "2025-03-29", type: "dini" },
@@ -426,7 +642,18 @@
             { name: "Cumhuriyet Bayramı", date: "2025-10-29", type: "resmi" }
         ];
 
-        
+        // Kategoriler ve renkleri
+        const categories = {
+            dogumGunu: { name: 'Doğum Günü', color: '#ff9999' },
+            yildonumu: { name: 'Yıldönümü', color: '#99ff99' },
+            toplanti: { name: 'Toplantı', color: '#9999ff' },
+            deadline: { name: 'Son Tarih', color: '#ffff99' },
+            diger: { name: 'Diğer', color: '#ff99ff' }
+        };
+
+        let activeCategories = Object.keys(categories);
+        let customEvents = JSON.parse(localStorage.getItem('customEvents') || '[]');
+
         function updateHolidays() {
             const holidayList = document.getElementById('holidayList');
             holidayList.innerHTML = '';
@@ -462,33 +689,47 @@
                 holidayList.appendChild(holidayElement);
             });
         }
-        
-        // Notlar fonksiyonu
-        function saveNotes() {
-            const notes = document.getElementById('notesInput').value;
-            localStorage.setItem('countdown-notes', notes);
-            alert('Notlarınız kaydedildi!');
+
+        function updateCategoryFilter() {
+            const filterContainer = document.getElementById('categoryFilter');
+            filterContainer.innerHTML = '';
+
+            Object.entries(categories).forEach(([key, value]) => {
+                const badge = document.createElement('div');
+                badge.className = `category-badge${activeCategories.includes(key) ? ' active' : ''}`;
+                badge.style.backgroundColor = value.color + '40'; // 40 is hex for 25% opacity
+                badge.style.border = `1px solid ${value.color}`;
+                
+                badge.innerHTML = `
+                    <span class="category-indicator" style="background-color: ${value.color}"></span>
+                    ${value.name}
+                `;
+
+                badge.addEventListener('click', () => {
+                    if (activeCategories.includes(key)) {
+                        activeCategories = activeCategories.filter(cat => cat !== key);
+                    } else {
+                        activeCategories.push(key);
+                    }
+                    updateCategoryFilter();
+                    updateCustomEvents();
+                });
+
+                filterContainer.appendChild(badge);
+            });
         }
-        
-        function clearNotes() {
-            document.getElementById('notesInput').value = '';
-            localStorage.removeItem('countdown-notes');
-            alert('Notlar temizlendi!');
-        }
-        
-        // Özel günler
-        let customEvents = JSON.parse(localStorage.getItem('customEvents') || '[]');
-        
+
         function addCustomEvent() {
             const name = document.getElementById('eventName').value;
             const date = document.getElementById('eventDate').value;
+            const category = document.getElementById('eventCategory').value;
             
             if (!name || !date) {
                 alert('Lütfen etkinlik adı ve tarih giriniz.');
                 return;
             }
-        
-            customEvents.push({ name, date });
+
+            customEvents.push({ name, date, category });
             localStorage.setItem('customEvents', JSON.stringify(customEvents));
             updateCustomEvents();
             
@@ -496,23 +737,27 @@
             document.getElementById('eventName').value = '';
             document.getElementById('eventDate').value = '';
         }
-        
+
         function deleteCustomEvent(index) {
             customEvents.splice(index, 1);
             localStorage.setItem('customEvents', JSON.stringify(customEvents));
             updateCustomEvents();
         }
-        
+
         function updateCustomEvents() {
             const customList = document.getElementById('customList');
             customList.innerHTML = '';
             const now = new Date();
-        
-            customEvents.forEach((event, index) => {
+
+            const filteredEvents = customEvents.filter(event => 
+                activeCategories.includes(event.category || 'diger')
+            );
+
+            filteredEvents.forEach((event, index) => {
                 const eventDate = new Date(event.date);
                 const diff = eventDate - now;
                 const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-        
+
                 const eventElement = document.createElement('div');
                 eventElement.className = 'custom-item';
                 
@@ -524,7 +769,10 @@
                 } else {
                     countdownText = 'Geçti';
                 }
-        
+
+                const category = event.category || 'diger';
+                eventElement.style.borderLeft = `4px solid ${categories[category].color}`;
+
                 eventElement.innerHTML = `
                     <span>${event.name}</span>
                     <div class="button-group">
@@ -535,7 +783,19 @@
                 customList.appendChild(eventElement);
             });
         }
+
+        function saveNotes() {
+            const notes = document.getElementById('notesInput').value;
+            localStorage.setItem('countdown-notes', notes);
+            alert('Notlarınız kaydedildi!');
+        }
         
+        function clearNotes() {
+            document.getElementById('notesInput').value = '';
+            localStorage.removeItem('countdown-notes');
+            alert('Notlar temizlendi!');
+        }
+
         // Sayfa yüklendiğinde
         document.addEventListener('DOMContentLoaded', () => {
             // Kaydedilmiş notları yükle
@@ -543,15 +803,16 @@
             if (savedNotes) {
                 document.getElementById('notesInput').value = savedNotes;
             }
-        
+
             // İlk güncellemeleri yap
             updateMainCountdown();
             updateHolidays();
+            updateCategoryFilter();
             updateCustomEvents();
-        
+
             // Holiday type switch event listener
             document.getElementById('holidayTypeSwitch').addEventListener('change', updateHolidays);
-        
+
             // Periyodik güncelleme
             setInterval(() => {
                 updateMainCountdown();
@@ -559,4 +820,313 @@
                 updateCustomEvents();
             }, 1000);
         });
-    </script>
+        let currentDate = new Date();
+let currentView = 'month';
+
+function initializeCalendar() {
+    document.getElementById('calendarViewSwitch').addEventListener('change', (e) => {
+        currentView = e.target.value;
+        updateCalendarView();
+    });
+
+    document.getElementById('prevBtn').addEventListener('click', () => {
+        if (currentView === 'month') {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+        } else {
+            currentDate.setDate(currentDate.getDate() - 7);
+        }
+        updateCalendarView();
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+        if (currentView === 'month') {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+        } else {
+            currentDate.setDate(currentDate.getDate() + 7);
+        }
+        updateCalendarView();
+    });
+
+    updateCalendarView();
+}
+
+function updateCalendarView() {
+    document.getElementById('monthView').style.display = currentView === 'month' ? 'block' : 'none';
+    document.getElementById('weekView').style.display = currentView === 'week' ? 'block' : 'none';
+
+    if (currentView === 'month') {
+        renderMonthView();
+    } else {
+        renderWeekView();
+    }
+}
+
+function renderMonthView() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    document.getElementById('currentDate').textContent = 
+        new Date(year, month).toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    let firstDayOfGrid = new Date(firstDay);
+    firstDayOfGrid.setDate(firstDayOfGrid.getDate() - (firstDayOfGrid.getDay() === 0 ? 6 : firstDayOfGrid.getDay() - 1));
+
+    const calendarDays = document.getElementById('calendarDays');
+    calendarDays.innerHTML = '';
+
+    for (let i = 0; i < 42; i++) {
+        const currentDay = new Date(firstDayOfGrid);
+        currentDay.setDate(firstDayOfGrid.getDate() + i);
+
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        
+        if (currentDay.getMonth() !== month) {
+            dayElement.classList.add('other-month');
+        }
+        
+        if (isToday(currentDay)) {
+            dayElement.classList.add('today');
+        }
+
+        dayElement.innerHTML = `
+            <div class="date">${currentDay.getDate()}</div>
+            <div class="events">
+                ${getEventsForDate(currentDay)}
+            </div>
+        `;
+
+        calendarDays.appendChild(dayElement);
+    }
+}
+
+function renderWeekView() {
+    const startOfWeek = new Date(currentDate);
+    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 1);
+    
+    document.getElementById('currentDate').textContent = 
+        `${startOfWeek.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })} - 
+         ${new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}`;
+
+    const weekDays = document.getElementById('weekDays');
+    const weekBody = document.getElementById('weekBody');
+    
+    weekDays.innerHTML = '';
+    weekBody.innerHTML = '';
+
+    // Saat sütunu
+    weekBody.innerHTML += '<div class="time-column">' + 
+        Array.from({length: 24}, (_, i) => 
+            `<div class="time-slot"><div class="time-label">${i.toString().padStart(2, '0')}:00</div></div>`
+        ).join('') + '</div>';
+
+    // Günleri oluştur
+    for (let i = 0; i < 7; i++) {
+        const day = new Date(startOfWeek);
+        day.setDate(startOfWeek.getDate() + i);
+
+        // Başlık
+        const dayHeader = document.createElement('div');
+        dayHeader.textContent = day.toLocaleDateString('tr-TR', { weekday: 'short', day: 'numeric' });
+        weekDays.appendChild(dayHeader);
+
+        // Gün sütunu
+        const dayColumn = document.createElement('div');
+        dayColumn.className = 'day-column';
+        
+        // Saat slotları
+        for (let hour = 0; hour < 24; hour++) {
+            const timeSlot = document.createElement('div');
+            timeSlot.className = 'time-slot';
+            
+            // O saatteki etkinlikleri ekle
+            const events = getEventsForDateTime(day, hour);
+            if (events) {
+                timeSlot.innerHTML += `<div class="week-event">${events}</div>`;
+            }
+            
+            dayColumn.appendChild(timeSlot);
+        }
+        
+        weekBody.appendChild(dayColumn);
+    }
+}
+
+function getEventsForDate(date) {
+    const events = [];
+    
+    // Resmi tatilleri kontrol et
+    holidays.forEach(holiday => {
+        if (isSameDay(new Date(holiday.date), date)) {
+            events.push(`<div class="event">${holiday.name}</div>`);
+        }
+    });
+    
+    // Özel günleri kontrol et
+    customEvents.forEach(event => {
+        if (isSameDay(new Date(event.date), date)) {
+            events.push(`<div class="event">${event.name}</div>`);
+        }
+    });
+    
+    return events.join('');
+}
+
+function getEventsForDateTime(date, hour) {
+    // Burada saatli etkinlikler için logic eklenebilir
+    return null;
+}
+
+function isToday(date) {
+    const today = new Date();
+    return isSameDay(date, today);
+}
+
+function isSameDay(date1, date2) {
+    return date1.getDate() === date2.getDate() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getFullYear() === date2.getFullYear();
+}
+
+// Calendar initialization
+document.addEventListener('DOMContentLoaded', () => {
+    initializeCalendar();
+});
+    
+
+let reminderEnabled = JSON.parse(localStorage.getItem('reminderEnabled') || 'false');
+        let reminderDays = parseInt(localStorage.getItem('reminderDays') || '7');
+
+        // Hatırlatıcı ayarlarını yükle
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('enableReminders').checked = reminderEnabled;
+            document.getElementById('reminderDays').value = reminderDays;
+            
+            // Hatırlatıcı ayarlarını kaydet
+            document.getElementById('enableReminders').addEventListener('change', (e) => {
+                reminderEnabled = e.target.checked;
+                localStorage.setItem('reminderEnabled', reminderEnabled);
+                if (reminderEnabled) {
+                    checkReminders();
+                }
+            });
+
+            document.getElementById('reminderDays').addEventListener('change', (e) => {
+                reminderDays = parseInt(e.target.value);
+                localStorage.setItem('reminderDays', reminderDays);
+                if (reminderEnabled) {
+                    checkReminders();
+                }
+            });
+
+            // Dosya yükleme işleyicisi
+            document.getElementById('importFile').addEventListener('change', handleFileImport);
+            
+            // İlk hatırlatıcı kontrolü
+            if (reminderEnabled) {
+                checkReminders();
+            }
+        });
+
+        function checkReminders() {
+            if (!reminderEnabled) return;
+
+            const now = new Date();
+            const allEvents = [...holidays, ...customEvents];
+            
+            allEvents.forEach(event => {
+                const eventDate = new Date(event.date);
+                const daysUntil = Math.ceil((eventDate - now) / (1000 * 60 * 60 * 24));
+                
+                if (daysUntil === reminderDays) {
+                    showNotification(event);
+                }
+            });
+        }
+
+        function showNotification(event) {
+            // Tarayıcı bildirim izni kontrolü
+            if (Notification.permission === "granted") {
+                new Notification(`Tatil Hatırlatıcısı`, {
+                    body: `${event.name} tatiline ${reminderDays} gün kaldı!`,
+                    icon: '/favicon.ico'
+                });
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        showNotification(event);
+                    }
+                });
+            }
+        }
+
+        function exportData() {
+            const data = {
+                customEvents,
+                notes: localStorage.getItem('countdown-notes') || '',
+                reminderSettings: {
+                    enabled: reminderEnabled,
+                    days: reminderDays
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tatil-takvimi-yedek-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function handleFileImport(e) {
+            try {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const text = await file.text();
+                const data = JSON.parse(text);
+                
+                // Verileri içe aktar
+                if (data.customEvents) {
+                    customEvents = data.customEvents;
+                    localStorage.setItem('customEvents', JSON.stringify(customEvents));
+                }
+                
+                if (data.notes) {
+                    localStorage.setItem('countdown-notes', data.notes);
+                    document.getElementById('notesInput').value = data.notes;
+                }
+                
+                if (data.reminderSettings) {
+                    reminderEnabled = data.reminderSettings.enabled;
+                    reminderDays = data.reminderSettings.days;
+                    localStorage.setItem('reminderEnabled', reminderEnabled);
+                    localStorage.setItem('reminderDays', reminderDays);
+                    document.getElementById('enableReminders').checked = reminderEnabled;
+                    document.getElementById('reminderDays').value = reminderDays;
+                }
+                
+                // Arayüzü güncelle
+                updateCustomEvents();
+                alert('Veriler başarıyla içe aktarıldı!');
+                
+            } catch (error) {
+                alert('Dosya içe aktarılırken bir hata oluştu: ' + error.message);
+            }
+            
+            // Dosya seçiciyi temizle
+            e.target.value = '';
+        }
+                    // Hatırlatıcıları kontrol et
+        if (reminderEnabled) {
+            checkReminders();
+        }
+</script>
+</body>
+</html>
